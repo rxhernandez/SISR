@@ -4,12 +4,15 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 import scipy.constants as sp
 from scipy.optimize import least_squares
-#sys.path.append(os.path.abspath('../../4-nonlin/rxn_kin_gen_algo'))
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 from pylab import *
-from rxn_mech_gen_gtc import reaction_mechanism_generator as rmg
-from rxn_mech_gen_gtc import reaction_system
+
+sys.path.append(os.path.abspath('../src'))
+from Reaction_Mechanism_Generator import reaction_mechanism_generator as rmg
+from Reaction_Mechanism_Generator import reaction_system
+
+
 #from mech_plot import plot_mechanism
 matplotlib.rcParams["font.family"] = "Times New Roman"
 #plt.rcParams.update({"text.usetex": True})
@@ -22,7 +25,7 @@ def normalize_probs(probs):
 
 def derivatives(t, concentration, k0, k1, k2, k3, k4):
     A, B = concentration
-    dAdt =  -k0*2*A*A - k2*A + k2*2*A - k3*A*B 
+    dAdt =  -k0*2*A*A - k2*A + k2*2*A - k3*A*B
     dBdt =  -k1*2*B*B - k3*A*B +k3*2*A*B -k4*B
     return [dAdt, dBdt]
 
@@ -67,7 +70,7 @@ plt.figure()
 step = int(total_time/Dt/20)
 step = 1
 print(step)
-    
+
 plt.plot(sol_time[::step], concentrations[0][::step],'-',markersize = 11,markeredgewidth = 1.0,markeredgecolor = 'w', lw=2.0,color="k")
 plt.plot(sol_time[::step], concentrations[1][::step],'-',markersize = 11,markeredgewidth = 1.0,markeredgecolor = 'w', lw=2.0,color="k")
 #plt.show()
@@ -80,13 +83,13 @@ while i<len(sol_time):
 	print(sol_time[i],concentrations[0][i],concentrations[1][i], file = out_file)
 	i+=1
 #############################################
-out_file.close()																																   
+out_file.close()
 #############################################
 
 
 # rmg inputs
 number_of_generations = 20
-mechanisms_per_generation = 2000
+mechanisms_per_generation = 500
 min_rxns_per_mech = 2
 max_rxns_per_mech = 2
 fraction_of_mechanisms_passed_on = 0.1
@@ -102,7 +105,7 @@ print("Predicted rates = ", ks)
 rm = list(mech_list[2])
 
 def odes(t, y):
-    return reaction_system(t, y, rm, ks)  
+    return reaction_system(t, y, rm, ks)
 
 
 # Solve the system using solve_ivp
@@ -112,8 +115,8 @@ sol_time = sol.t
 concentrations = sol.y
 
 
-plt.plot(sol_time, concentrations[0],ls = '--', lw = 3, label = "A")    
-plt.plot(sol_time, concentrations[1],ls = '--', lw = 3, label = "B")    
+plt.plot(sol_time, concentrations[0],ls = '--', lw = 3, label = "A")
+plt.plot(sol_time, concentrations[1],ls = '--', lw = 3, label = "B")
 
 out_file=open("./fit_data.txt", "w") #windows
 i = 0
@@ -123,12 +126,12 @@ while i<len(sol_time):
 #############################################
 out_file.close()
 
-     
-        
-							  
-									
 
-																   
-																			
-														  
+
+
+
+
+
+
+
 plt.show()

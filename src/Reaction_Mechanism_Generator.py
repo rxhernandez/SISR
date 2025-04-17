@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 import itertools
 import numpy as np
 from math import comb
@@ -6,18 +7,20 @@ from numpy.core.numeric import isscalar
 from scipy.optimize import least_squares
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-from GA_new import generate_new_mechs
-from GA_new import generate_mutations
 import scipy.constants as sp
 import itertools
 import random
+
+# Libraries for genetic algorithm
+from Genetic_Algorithm import generate_new_mechanism
+from Genetic_Algorithm import generate_mutations
+
 pathname = os.path.dirname(sys.argv[0])
 fullpath = os.path.abspath(pathname)
 
 
-
 class reaction_mechanism_generator():
-
+    '''Class containing the reaction mechanism generator.'''
     def __init__(
         self,
         order=1, # order of the system, provided when creating the object, else 1
@@ -34,6 +37,8 @@ class reaction_mechanism_generator():
 
     ):
 
+        if order < 0:
+            raise ValueError("order cannot be negative")
         if max_ratio < 1:
             raise ValueError("max_ratio cannot be less than 1")
         if num_generations < 1:
@@ -48,13 +53,12 @@ class reaction_mechanism_generator():
             raise ValueError("rxns_per_mech cannot be less than 1")
         if not (0 < from_previous_generation <= 1):
             raise ValueError("from_previous_generation  ∈ [0,1]")
-        if order < 0:
-            raise ValueError("order cannot be negative")
         if mutation_prob < 0:
             raise ValueError("mutation_prob ∈ [0,1]")
         if round(2*from_previous_generation*num_mech_per_gen) == 0:
             raise ValueError(f"from_previous_generation and num_mech_per_gen has been set such that no best_mechs has lenght 0")
 
+        # Initialize parameters
         self.include_bias = include_bias
         self.order = order
         self.prev_gen = from_previous_generation
@@ -70,8 +74,6 @@ class reaction_mechanism_generator():
         self.reaction_matrix = []
         self.reaction_constants = []
         self.mse = 0
-        M0 = None
-        #numpy.zeros
 
     def fit(self, Theta, X):
         """
@@ -96,14 +98,6 @@ class reaction_mechanism_generator():
         print("number of rxns = ", len(reaction_list))
         # Generate mechanisms based on reactions and data
         mechanism_list = self._generate_mechanism(reaction_list, Theta, X)
-        #print("mechanism list =", mechanism_list)
-
-        # Print details and plot the mechanisms
-        #for mech in mechanism_list:
-        #    print("Mechanism:", *mech[0])
-        #    print("Reaction rates (k's):", mech[2])
-        #    print("Mean Squared Error (MSE):", mech[3])
-        #    plot_mechanism(mech[0], mech[2], Theta, X, filename='plot_obtained_mechanism.png')
 
         return self, mechanism_list
 
@@ -121,7 +115,6 @@ class reaction_mechanism_generator():
             if sum(combination) <= self.order:
                 reactants_combinations.append(combination)
         reactants_combinations = np.array(reactants_combinations)
-        #print("all possible reactants states = ", reactants_combinations)
 
         # Generate combinations for the products
         products_combinations = []
@@ -129,7 +122,6 @@ class reaction_mechanism_generator():
             if sum(combination) <= self.order * self.max_stoich:
                 products_combinations.append(combination)
         products_combinations = np.array(products_combinations)
-        #print("all possible products states = ",products_combinations)
 
         combined_combinations = []
         count_by_order = np.full(self.order + 1, 0)
@@ -161,20 +153,15 @@ class reaction_mechanism_generator():
                     count_by_order[0] += 1
                 else:
                     count_by_order[r_sum] += 1
-        #print("all possible reactions =",combined_combinations)
-        #print("number of rxns =", len(combined_combinations))
-        #sys.exit()
-        #print("Hello")
+
         # Store reactions with their probabilities
         reaction_with_prob = np.array([None] * len(combined_combinations))
         for i, rxn in enumerate(combined_combinations):
             #print(rxn)
             r = sum(rxn[:self.n_targets])
             p = sum(rxn[self.n_targets:])
-            order = r if p != 0 else p            
-            #prob = 1 / (self.order + 1) * 1 / count_by_order[order]
+            order = r if p != 0 else p
             prob = 1/len(combined_combinations) #equal weighting. Use this because islanding is being used
-            #print(prob)
             reaction_with_prob[i] = [rxn, prob]
 
         # Check probability sum
@@ -208,9 +195,9 @@ class reaction_mechanism_generator():
         reaction_list = np.array([item[0] for item in reactions_with_probs])
         probabilities = np.array([item[1] for item in reactions_with_probs])
         out_file=open(os.path.abspath(pathname)+"/rxn_list.txt", "w")
-        mech_file=open(os.path.abspath(pathname)+"/mech_list.txt", "w")         
-        
-        
+        mech_file=open(os.path.abspath(pathname)+"/mech_list.txt", "w")
+
+
         # Initialize the first generation of mechanisms
         mechanism_list = []
         #for i in range(self.num_mechs):
@@ -218,27 +205,21 @@ class reaction_mechanism_generator():
         while i<self.num_mechs:
             mech_i = []
             species_included = np.full(self.n_targets, False)
-            #print( "n_targets =", self.n_targets)
-            #sys.exit()
             rxn_count = 0
-            #number_of_reactions_in_mechanism = 
-            
+
             number_of_rxns = random.randint(self.min_rxns, self.max_rxns)#random
             print(number_of_rxns)
-  
+
             while not (np.all(species_included) and rxn_count == number_of_rxns):
                 if rxn_count >= self.max_rxns:
                     mech_i = []
                     rxn_count = 0
                     species_included = np.full(self.n_targets, False)
-                
+
                 num_of_rxns = len(reaction_list)
-                #print("num_of_rxns =", num_of_rxns)
-                #random_index = random.choice(reaction_list.shape[0]) #OLD code
                 random_index =random.choice(np.arange(num_of_rxns))
-                #print(random_index)
                 reaction_i = reaction_list[random_index]
-                
+
                 if array_not_in_list(reaction_i,mech_i): #stops adding the same reaction s
                     mech_i.append(reaction_i)
                     species_included = species_in_rxn(species_included, reaction_i, self.n_targets)
@@ -246,13 +227,9 @@ class reaction_mechanism_generator():
                     rxn_count += 1
                 else:
                     None
-                    #print("Stopping")
-                    #sys.exit()
-                
-            #mech_i = [[2,0,0,0,2,0],[0,1,0,0,0,1],[0,1,1,2,0,0]]
-            #print("Hello =", mech_i)
-            
+
             if i ==0:
+                # IDK
                 #mech_i = [np.array([1,1,0,0]),np.array([2,0,3,1])]
                 #mech_i = [np.array([1, 0, 2, 0]), np.array([2, 0, 1, 0]), np.array([0, 2, 0, 1]), np.array([1, 1, 0, 3]), np.array([1, 1, 0, 1]), np.array([0, 1, 0, 0]), np.array([2, 0, 2, 2])]
                 mech_i = [np.array([1, 0, 2, 0]), np.array([0, 1, 0, 0]), np.array([2, 0, 2, 2]), np.array([1, 1, 0, 1]), np.array([0, 2, 0, 1]), np.array([2, 0, 1, 0]), np.array([1, 1, 0, 3])]
@@ -261,14 +238,14 @@ class reaction_mechanism_generator():
                 #mech_i = [np.array([2,0,0,0]),np.array([0,2,0,0]),np.array([1,0,2,0]),np.array([1,1,0,2]),np.array([0,1,0,0])]
                 #mech_i = [np.array([2,0,0,0]),np.array([0,2,0,0]),np.array([1,0,2,0]),np.array([1,1,0,2]),np.array([0,1,0,0]),np.array([2,0,3,0])]
                 rxn_count = len(mech_i)
-			
+
 			#check if mech is in list:
             #is_mech_in_list = mech_check(mechanism_list, mech_i)
             #print(is_mech_in_list)
             if 1== 1:
                 print("mech =",i, mech_i, rxn_count, len(mech_i))
                 mechanism_list.append(mech_i)
-                i+=1			
+                i+=1
             #if is_mech_in_list == True:
             #    None
                 #sys.exit()
@@ -280,49 +257,45 @@ class reaction_mechanism_generator():
         # Estimate k values using average logarithmic slope
         k_arr = [np.abs(estimate_k_linearly(X, Theta[:, yi])) for yi in range(Theta.shape[1])]
         k_est = 10**np.mean(np.log10(k_arr))
-        
+
 
         time = X
         # Calculate the derivative that will be used in _fit_coefficients
         calculated_derivatives = np.gradient(Theta, X, axis=0)
         derivatives_max = np.max(np.abs(calculated_derivatives), axis=0, keepdims=True)
-        #print("derivatives max =", derivatives_max)
         normalized_calculated_derivatives = calculated_derivatives / derivatives_max
-        #normalized_calculated_derivatives = calculated_derivatives 
         lowest_error = 10000
         lowest_error_ind = 1
         lowest_error_gen = 1
-		
-		
+
+
 		#############################################
 		##############Start Genetic Algorithm########
 		#############################################
-		
+
         for gen_i in range(0, self.num_gens):
             # Evaluate mechanisms
             mech_error = np.full(len(mechanism_list), None)
             for ind, mi in enumerate(mechanism_list):
                 reaction_matrix = self._construct_matrix(mi)
-                #print(reaction_matrix)
                 X_coeff, mse = self._fit_coefficients(Theta, reaction_matrix, normalized_calculated_derivatives, derivatives_max, time, k0=k_est)
-                #print(f"Gen {gen_i}, mech {ind}, ks {X_coeff}, mse {mse}")
                 print(f"Gen {gen_i}, mech {ind}, mse {mse}, lowest_error {lowest_error}, lowest_err_gen {lowest_error_gen}, lowest_error_int {lowest_error_ind}")
                 rxn_order = len(X_coeff)
-                print(gen_i,ind,mse, rxn_order, file = out_file) 
-                print(gen_i,ind,reaction_matrix,file = mech_file) 
+                print(gen_i,ind,mse, rxn_order, file = out_file)
+                print(gen_i,ind,reaction_matrix,file = mech_file)
                 if mse<lowest_error:
                     lowest_error = mse
                     lowest_error_ind = ind
                     lowest_error_gen = gen_i
                     print(mi)
-                    ks = rate_constant_output(X_coeff)
+                    ks = X_coeff
                     rm = reaction_matrix
                 mech_error[ind] = [ind, X_coeff, mse]
 
             # Sort mechanisms by mean squared error
             sorted_mech_error = sorted(mech_error, key=lambda x: x[-1])
             n_from_previous_generation = int(self.prev_gen * self.num_mechs)
-            #print(sorted_mech_error)
+
             # Preserve the top mechanisms from the previous generation
             prev_gen_mechs = []
             new_best_mechs = []
@@ -335,20 +308,24 @@ class reaction_mechanism_generator():
             best_mechs = self._update_best_mechs(best_mechs, new_best_mechs, int(2 * self.prev_gen * self.num_mechs))
             print(f"Gen:{gen_i},{len(best_mechs)}")
             print("best mech =", best_mechs[0])
-            #sys.exit()
+
             if gen_i != self.num_gens -1:
                 # Generate new mechanisms using genetic algorithm
-                M0 = None
-                GA_mechs = generate_new_mechs(sorted_mech_error, mechanism_list, prev_gen_mechs, self.num_mechs - n_from_previous_generation,  M0, m = 0.2, ul=self.max_rxns, ll=self.min_rxns)
-                ####next_gen_mechs = prev_gen_mechs + GA_mechs
-                #print(best_mechs)
+                GA_mechs = generate_new_mechanism(sorted_mech_error,
+                    mechanism_list,
+                    prev_gen_mechs,
+                    self.num_mechs - n_from_previous_generation,
+                    selection_pressure = 0.2,
+                    upper_limit = self.max_rxns,
+                    lower_limit = self.min_rxns)
+
                 # Allow for mutation of mechanisms
-                #mechanism_list = generate_mutations(next_gen_mechs, self.mutation_prob, reaction_list) #just apply to 
-                GA_mechs_mutated = generate_mutations(GA_mechs, self.mutation_prob, reaction_list) #just apply to 
+                GA_mechs_mutated = generate_mutations(GA_mechs, self.mutation_prob, reaction_list) #just apply to
                 mechanism_list = prev_gen_mechs + GA_mechs_mutated
                 next_gen_mechs = prev_gen_mechs + GA_mechs_mutated
-        out_file.close() 
-        mech_file.close()          
+
+        out_file.close()
+        mech_file.close()
         return best_mechs,ks, rm
 
     def _construct_matrix(self, mechanism):
@@ -417,33 +394,23 @@ class reaction_mechanism_generator():
         elif len(k0) != reaction_matrix.shape[0]:
             raise ValueError("If k0 is array-like, it must have as many elements as there are reactions in reaction_matrix.")
 
-        # Define the objective function for least squares fitting        
+        # Define the objective function for least squares fitting
         def objective(k, X, y):
             predicted_derivatives = predict_derivative(k, X, y)
             normalized_predicted_derivatives = predicted_derivatives / Theta_dot_max
             difference = Theta_dot - normalized_predicted_derivatives
             diff_sum = np.sum(np.abs(difference), axis=1)
-            #print(diff_sum)
             mse = np.mean(np.square(difference))
-            #add in order and entropy of mechanism in loss:
-            
-            
-            #print("time = ", time)
-            #print("Theta =", Theta)
-            #print("Theta dot =", Theta_dot)
-            #print(y)
-            #plt.plot(X,Theta)
-            
             return diff_sum, mse
-            
-            
+
+
         def objective_complexity(X):
             mech = X
             complexity = 0
             for rxn in mech:
                 complexity += np.sum(rxn)
 
-            
+
             return complexity
 
         # Define the function to predict derivatives based on current coefficients
@@ -462,15 +429,9 @@ class reaction_mechanism_generator():
         # Perform least squares fitting using the `least_squares` function
         result = least_squares(lambda k, X, y: objective(k, X, y)[0], k0, args=(reaction_matrix, Theta), loss='linear', bounds=(0, np.inf),method="trf", max_nfev = 10)#5bounds=(0, np.inf), method="trf")
         k_fit = result.x
-        #k_fit,reaction_matrix = self._apply_threshold(k_fit,reaction_matrix)
-        
         residuals, mse = objective(k_fit, reaction_matrix, Theta)
-        
         alpha_complexity = 0.0 # complexity penalty
-        #print(mse,alpha_complexity*objective_complexity(reaction_matrix))
-        
         mse += alpha_complexity*objective_complexity(reaction_matrix)
-
         return k_fit, mse
 
     def _update_best_mechs(self, best_mechs, new_mechs, n_best_rxns):
@@ -533,14 +494,13 @@ class reaction_mechanism_generator():
         if ks_max-ks_min <= self.max_ratio:
             return ks, reaction_matrix
         else:
-            #print(ks,log_ks)
             # Find indices where values break the condition
             valid_indices = np.where((log_ks <= ks_max) & (log_ks >= ks_max - self.max_ratio))[0]
             # Filter ks and reaction_matrix by valid indices
             filtered_ks = ks[valid_indices]
             new_rxn_mech = np.array(reaction_matrix)[valid_indices]
             return filtered_ks, new_rxn_mech
-            
+
 
 
 def species_in_rxn(species_included, reaction, n_targets):
@@ -674,7 +634,7 @@ def estimate_k_linearly(x, y):
 
     # Calculate and return the slope between the first point and the point with the maximum y
     return (max_y - y[0]) / (max_x - x[0])
-    
+
 def array_not_in_list(arr, list_of_arrays):
   """Checks if an array is not present in a list of arrays."""
 
@@ -682,11 +642,10 @@ def array_not_in_list(arr, list_of_arrays):
       if (arr == other_arr).all():
           return False
   return True
-  
+
 def mech_check(mechanism_list, mech_i):
   """Checks if mech is already present in a list of arrays."""
-  #print("mech check for =", mech_i)
-  #print("mech_list =", mechanism_list)
+
   are_equal = False
   mech_is_in_mech_list = False
   for other_mech in mechanism_list:
@@ -698,13 +657,5 @@ def mech_check(mechanism_list, mech_i):
         #print("permutations =", permutations)
         mech_is_in_mech_list = True
         continue #sys.exit()
-  #if are_equal == True:
-  #if is_in_list == True:
-    #return True
-  #else:
-  return mech_is_in_mech_list 
 
-
-def rate_constant_output(ks):
-    return ks
-    
+  return mech_is_in_mech_list

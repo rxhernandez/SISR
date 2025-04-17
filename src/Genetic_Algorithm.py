@@ -1,312 +1,291 @@
 import sys
 import numpy as np
 import itertools
+from typing import List, Tuple, Any
 
-def crossover(parent1, parent2, M0, ul, ll):
-    # Combine the parents to create a gene pool
-    #N = len(M0)
+def crossover(
+    parent1: np.ndarray,
+    parent2: np.ndarray,
+    upper_limit: int,
+    lower_limit: int
+) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+    """
+    Performs crossover operation as part of the genetic algorithm.
+
+    Parameters:
+        - parent1 (np.ndarray): Reaction matrix of first parent network (N x 2 matrix)
+        - parent2 (np.ndarray): Reaction matrix of second parent network (N x 2 matrix)
+        - upper_limit (int): Maximum reactions per offspring network
+        - lower_limit (int): Minimum reactions per offspring network
+
+    Returns:
+        Tuple[List[np.ndarray], List[np.ndarray]]: Two valid offspring reaction networks
+    """
+
+    # Combine parent reaction pools and remove duplicate reactions
     gene_pool = np.concatenate((parent1, parent2))
-    #print("p1 =", parent1)
-    #print("p2 =", parent2)
-    #print(gene_pool)
-    #print(len(gene_pool))
-    #print(np.unique(gene_pool,axis=0))
-    has_duplicates = len(np.unique(gene_pool,axis=0)) != len(gene_pool) #remove reactions that are common to both parents
-    #print(has_duplicates)
-    if has_duplicates == True:
-        gene_pool_cut = np.unique(gene_pool,axis=0)
-        gene_pool = gene_pool_cut
-        #print(len(gene_pool_cut)) 
-        total_genes = gene_pool.shape[0]
-        max_genes = min(ul, total_genes)        
-    
-    else:
-        total_genes = gene_pool.shape[0]
-        max_genes = min(ul, total_genes)
+    unique_reactions = np.unique(gene_pool, axis=0)
 
-    # Determine a random number of elements for each offspring, capped by max_genes
-    num_genes_offspring1 = np.random.randint(ll, max_genes + 1)
-    num_genes_offspring2 = np.random.randint(ll, max_genes + 1)
-    
-    #print(num_genes_offspring1, num_genes_offspring2)
-    #sys.exit()
-    N = int(len(gene_pool[0])/2)
+    # Enforce maximum network complexity constraints
+    viable_reactions = unique_reactions if unique_reactions.shape[0] < gene_pool.shape[0] else gene_pool
+    total_available_reactions = viable_reactions.shape[0]
+    max_reactions = min(upper_limit, total_available_reactions)
 
-    # Simple crossover if no M0 is provided
-    offspring_work = False
-    while offspring_work == False:
-        species_included_1 = np.full(N, False)
-        species_included_2 = np.full(N, False)
-        offspring1_genes_idx = np.random.choice(range(total_genes), size=num_genes_offspring1, replace=False)
-        #print(offspring1_genes_idx)
-        offspring2_genes_idx = np.random.choice(range(total_genes), size=num_genes_offspring2, replace=False)
-        #print(offspring2_genes_idx)
-        
-        offspring1 = [gene_pool[idx] for idx in offspring1_genes_idx]
-        offspring2 = [gene_pool[idx] for idx in offspring2_genes_idx]
-        
-        for rxn in offspring1:
-            species_included_1 = species_in_rxn(species_included_1, rxn, N)
-            
-        for rxn in offspring2:
-            species_included_2 = species_in_rxn(species_included_2, rxn, N)
-            
-        if np.all(species_included_1) ==True and np.all(species_included_2) == True:
-            offspring_work = True
-        else:
-            offspring_work = False
+    # Initialize species inclusion tracking
+    num_species = int(len(gene_pool[0])/2)  # Derived from stoichiometric matrix dimensions
+    max_attempts = 500  # Prevent infinite loops in pathological cases
+    attempts = 0
 
-        
-    return offspring1, offspring2
+    while attempts < max_attempts:
+        # Randomly select network sizes within constrained bounds
+        offspring1_size = np.random.randint(lower_limit, max_reactions + 1)
+        offspring2_size = np.random.randint(lower_limit, max_reactions + 1)
 
-    ## Randomly select the elements for each offspring without replacement
-    #offspring = [[], []]
-    #for i, num_genes in enumerate([num_genes_offspring1, num_genes_offspring2]):
-    #    print("Hello")
-    #    sys.exit()
-    #    species_included = np.full(N, False)
-    #    features_checked = np.full(N, False)
-    #    rxn_count = 0
-    #    while not (np.all(species_included) and np.all(features_checked) and rxn_count >= ll):
-    #        if rxn_count > ul:
-    #            rxn_count = 0
-    #            offspring[i] = []
-    #            species_included = np.full(N, False)
-    #            features_checked = np.full(N, False)
-    #
-    #        random_index = np.random.choice(total_genes)
-    #        reaction_i = gene_pool[random_index]
-    #        species_included = species_in_rxn(species_included, reaction_i, N)
-    #        offspring[i].append(reaction_i)
-    #        features_checked = feature_analysis(features_checked,offspring[i],M0)
-    #        rxn_count +=1
-    #
-    #return offspring[0], offspring[1]
+        # Create candidate networks through random reaction selection
+        offspring1_idx = np.random.choice(range(total_available_reactions), offspring1_size, replace=False)
+        offspring2_idx = np.random.choice(range(total_available_reactions), offspring2_size, replace=False)
 
-# Example function to generate new mechanisms
-def generate_new_mechs(mech_ids_sorted, mech_list, prev_gen_mechs, num_new_mechs, M0, m, ul, ll):
-    M0 = None
+        offspring1 = [viable_reactions[idx] for idx in offspring1_idx]
+        offspring2 = [viable_reactions[idx] for idx in offspring2_idx]
+
+        # Verify species participation
+        if (_validate_network(offspring1, num_species) and
+            _validate_network(offspring2, num_species)):
+            return offspring1, offspring2
+
+        attempts += 1
+
+    raise RuntimeError(f"Failed to generate valid mechanisms after {max_attempts} attempts")
+
+def _validate_network(
+    network: List[np.ndarray],
+    num_species: int
+) -> bool:
+    """Validates that all species participate in at least one reaction"""
+    species_present = np.zeros(num_species, dtype=bool)
+    for reaction in network:
+        # Split reaction into reactants and products
+        reactants = reaction[:num_species].astype(bool)
+        products = reaction[num_species:].astype(bool)
+
+        # Combine using logical OR to find participating species
+        participating = reactants | products
+
+        # Update presence tracking
+        species_present |= participating
+
+    return bool(np.all(species_present))
+
+def generate_new_mechanism(
+    mech_ids_sorted: List[Any],
+    mech_list: List[List[np.ndarray]],
+    prev_gen_mechs: List[List[np.ndarray]],
+    num_new_mechs: int,
+    selection_pressure: float,
+    upper_limit: int,
+    lower_limit: int
+) -> List[List[np.ndarray]]:
+    """
+    Generate a new population of reaction mechanisms using genetic algorithm.
+
+    Parameters:
+        mech_ids_sorted (List[Any]): Sorted indices or identifiers for mechanisms by fitness.
+        mech_list (List[List[np.ndarray]]): List of mechanisms, each a list of reactions.
+        prev_gen_mechs (List[List[np.ndarray]]): Mechanisms from the previous generation.
+        num_new_mechs (int): Number of new mechanisms to generate.
+        selection_pressure (float): Selection pressure parameter for parent selection probabilities.
+        upper_limit (int): Maximum number of reactions per mechanism.
+        lower_limit (int): Minimum number of reactions per mechanism.
+
+    Returns:
+        List[List[np.ndarray]]: List of newly generated mechanisms.
+    """
+
     next_gen_mechs = []
-    num_mechs = len(mech_ids_sorted)
-	
     num_mechs = len(prev_gen_mechs)
 
-    # Compute selection probabilities based on rank
-    probabilities = np.array([(m + (num_mechs - i)) for i in range(num_mechs)])
+    # Compute selection probabilities based on rank (higher rank = higher probability)
+    probabilities = np.array([
+        (selection_pressure + (num_mechs - i)) for i in range(num_mechs)
+    ])
     probabilities = probabilities / np.sum(probabilities)
-	
-    probabilities = probabilities[:num_mechs]/ np.sum(probabilities[:num_mechs])
-    #print(probabilities)
-    #sys.exit()
-    # Generate new mechanisms through crossover
-    while len(next_gen_mechs) < num_new_mechs:
-        # Randomly select two parents using the calculated probabilities
-        parents_idx = np.random.choice(range(num_mechs), size=2, replace=False, p=probabilities)
 
-        parent_id1, parent_id2 = mech_ids_sorted[parents_idx[0]], mech_ids_sorted[parents_idx[1]]
-        #print(parents_idx,parent_id1, parent_id2)
+    # Generate new mechanisms through crossover until desired number is reached
+    while len(next_gen_mechs) < num_new_mechs:
+        # Select two distinct parent mechanisms based on selection probabilities
+        parent_indices = np.random.choice(
+            range(num_mechs), size=2, replace=False, p=probabilities
+        )
+        parent_id1, parent_id2 = mech_ids_sorted[parent_indices[0]], mech_ids_sorted[parent_indices[1]]
         parent1 = mech_list[parent_id1[0]]
         parent2 = mech_list[parent_id2[0]]
 
-        offspring1,offspring2 = crossover(parent1, parent2, M0, ul, ll)
-        #print("off1 = ", offspring1)
-        #print("off2 = ", offspring2)
-        #sys.exit()
-        is_off1_in_list = mech_check(prev_gen_mechs, offspring1)
-        is_off2_in_list = mech_check(prev_gen_mechs, offspring2)
-        if is_off1_in_list == False and is_off2_in_list == False: #both offspring are not on mechlist
-            next_gen_mechs.extend([offspring1,offspring2])
-            #mech_list = mech_list + offspring1 + offspring2 #uncomment if there is a problem generating new mechs
-			#print("finished generating", len(next_gen_mechs), "of", num_new_mechs)
-        else:
-            print("overlap detected in crossover:", "finished generating", len(next_gen_mechs), "of", num_new_mechs)
+        # Crossover: combine reactions from both parents to create two offspring mechanisms
+        offspring1, offspring2 = crossover(parent1, parent2, upper_limit, lower_limit)
 
-    # Ensure next_gen_mechs doesn't exceed num_mechs if num_mechs is odd
+        # Ensure offspring mechanisms are not duplicates of previous generation
+        is_off1_new = not mech_check(prev_gen_mechs, offspring1)
+        is_off2_new = not mech_check(prev_gen_mechs, offspring2)
+        if is_off1_new and is_off2_new:
+            next_gen_mechs.extend([offspring1, offspring2])
+        else:
+            print(
+                "Overlap detected in crossover: finished generating",
+                len(next_gen_mechs), "of", num_new_mechs
+            )
+
+    # Truncate to the requested number of mechanisms (in case of over-generation)
     next_gen_mechs = next_gen_mechs[:num_new_mechs]
     return next_gen_mechs
 
-def generate_mutations(mech_list, mut_prob, reactions_list):
-    # Number of mechanisms and reactions in the mechanism list
-    num_mechs = len(mech_list)
-    num_reactions = len(reactions_list)
-    lambda_mut = mut_prob*num_mechs
+def generate_mutations(
+    mech_list: List[List[np.ndarray]],
+    mut_prob: float,
+    reactions_list: List[np.ndarray],
+    max_attempts: int = 1000
+) -> None:
+    """
+    Applies mutation operations to a population of mechanisms.
+    Each mutation replaces a reaction in a randomly chosen mechanism with a new reaction,
+    ensuring all species remain represented and no duplicate reactions are introduced.
 
-    # Generate the number of mutations following a Poisson distribution
-    #num_mutations = np.random.poisson(lambda_mut)
+    Parameters:
+        mech_list (List[List[np.ndarray]]): List of mechanisms, each a list of reactions.
+        mut_prob (float): Mutation probability per mechanism.
+        reactions_list (List[np.ndarray]): Pool of all possible reactions.
+        max_attempts (int): Maximum attempts to find a valid replacement reaction.
+    """
+    num_mechs = len(mech_list)
+    lambda_mut = mut_prob * num_mechs
     num_mutations = int(lambda_mut)
 
-    # Perform mutations
     for _ in range(num_mutations):
-        # Randomly select a mechanism to mutate
+        # Randomly select a mechanism and a reaction within it
         mech_idx = np.random.randint(0, num_mechs)
         selected_mech = mech_list[mech_idx]
-
-        # Randomly select a reaction within the selected mechanism
         reaction_idx = np.random.randint(0, len(selected_mech))
-        selected_reaction = selected_mech[reaction_idx]
+        number_of_species = int(len(selected_mech[reaction_idx]) / 2)
 
-        # Extract the first 4 elements of the selected reaction This should be the number of species*2
-        #reactants = selected_reaction[:4]
-        reactants = selected_reaction
-        #print("reactants =", reactants, selected_reaction,"old mech =", selected_mech)
-
-
-        # Find all reactions in the reaction list that have the same first 4 elements (reactants)
-        #matching_reactions = np.array([reaction for reaction in reactions_list if np.array_equal(reaction[:4], reactants)])
-
-        # Filter out reactions that are identical to the selected reaction (to ensure mutation)
-        #matching_reactions = np.array([reaction for reaction in matching_reactions if not np.array_equal(reaction[4:], selected_reaction[4:])])
-
-        # If there are no valid mutations, skip this iteration
-        #if len(matching_reactions) == 0:
-        #    continue
-
-        # Randomly select a new reaction from the filtered list of matching reactions
-        #new_reaction = matching_reactions[np.random.randint(0, len(matching_reactions))]
-        
-        number_of_species = int(len(selected_reaction)/2) #takes the full reaction vector and divides by two to get the number of species in the reaction
-        species_included = np.full(number_of_species, False) #makes an array of boolean values for that number of species
-        
-        #Loop over all rxns in the mech except the one that is being replaced to construct species included:
-        for rxn in range(len(selected_mech)):
-            if rxn == reaction_idx: #this is the rxn your replacing, so don't include in species count
+        # Track which species are included by the remaining reactions
+        species_included = np.full(number_of_species, False)
+        for i, rxn in enumerate(selected_mech):
+            if i == reaction_idx:
                 continue
-            else:
-                reaction_i = selected_mech[rxn]
-                species_included = species_in_rxn(species_included, reaction_i, number_of_species) #last element is number of species
-                
-        # find a rxn that is not already in the mechanims and that satisfies the species_included constraint 
-        is_new_rxn_in_mech = False
-        while not (np.all(species_included) and is_new_rxn_in_mech):
+            species_included = species_in_reaction(species_included, rxn, number_of_species)
+
+        # Try to find a valid new reaction to replace the selected one
+        for attempt in range(max_attempts):
             new_reaction_idx = np.random.randint(0, len(reactions_list))
-            #print("new rxn ID =", new_reaction_idx)
             new_reaction = reactions_list[new_reaction_idx]
-            is_new_rxn_in_mech = array_not_in_list(new_reaction,selected_mech)
-            species_included = species_in_rxn(species_included, new_reaction, number_of_species)#last element is number of species
-        
-        
-
-        # Apply the mutation by replacing the selected reaction in the mechanism with the new reaction
-        mech_list[mech_idx][reaction_idx] = new_reaction
-        #print("new reaction =", new_reaction)
-        #print("new mech =", mech_list[mech_idx])
-        #sys.exit()
-    return mech_list
-
-def species_in_rxn(species_included, reaction, n_targets):
-    """
-    Update the list of included species based on whether they appear in a given reaction.
-
-    Parameters:
-    - species_included (array-like of bool): Array indicating which species are currently included.
-    - reaction (array-like): Array representing a reaction, where the first half corresponds to reactants
-      and the second half to products.
-    - n_targets (int): Number of target species, used to split the reaction array into reactants and products.
-
-    Returns:
-    - array-like of bool: Updated array indicating which species are involved in the reaction.
-
-    Notes:
-    - The function marks species as included if they have a non-zero coefficient in either the reactants
-      or products of the reaction.
-    """
-
-    # Create a copy of the species_included array to update
-    species_included_updated = np.copy(species_included)
-
-    # Iterate over each species and check if it is involved in the reaction
-    for si in range(n_targets):
-        if reaction[si] != 0 or reaction[si + n_targets] != 0:
-            species_included_updated[si] = True
-    return species_included_updated
-
-def feature_analysis(features_checked,M,M0):
-    '''
-    Update the list of features that have beenn included based on whether they appear in a given mechanism.
-
-    Parameters:
-    - M0 (None or array-like, optional): Initial guesses for what the mechanism looks like constants.
-                If array, constraint the mechanism to ensure certain features are included.
-    - M0 (None or array-like, optional): Initial guesses for what the mechanism looks like constants.
-                If array, constraint the mechanism to ensure certain features are included.
-
-    Returns:
-    - array-like of bool: Updated array indicating which features have been included in the mechanism thus far.
-    '''
-
-    features_checked_updated = np.copy(features_checked)
-    N = len(M0)
-
-    for i, trend in enumerate(M0):
-        coeff_ids = np.where(trend > 0)[0]
-        if len(coeff_ids) == 0:
-            features_checked_updated[i] = True
-            break
-        if len(coeff_ids) == 1:
-            for rj, reaction in enumerate(M):
-                active_features = trend*reaction
-                constraint = active_features[N:]-active_features[:N]
-                #print(trend,reaction,active_features,constraint)
-                if not np.all(constraint==0):
-                    features_checked_updated[i] = True
-                    break
-        elif len(coeff_ids) == 2:
-            trend1 = trend[:N]
-            trend2 = trend[N:]
-            for rj, reaction in enumerate(M):
-                active_features1 = trend1*reaction[:N]
-                active_features2 = trend2*reaction[N:]
-                constraint = active_features2-active_features1
-                #print(trend,reaction,active_features1,active_features2,constraint)
-                if not np.all(constraint==0):
-                    features_checked_updated[i] = True
+            if array_not_in_list(new_reaction, selected_mech):
+                temp_species_included = species_in_reaction(species_included, new_reaction, number_of_species)
+                if np.all(temp_species_included):
+                    # Apply the mutation
+                    mech_list[mech_idx][reaction_idx] = new_reaction
                     break
         else:
-            print(M0)
-            raise ValueError(f'Invalid number of elements in vector M0, index = {i}')
-    return features_checked_updated
-	
-def mech_check(mechanism_list, mech_i):
-  """Checks if mech is already present in a list of arrays."""
-  #print("mech check for =", mech_i)
-  #print("mech_list =", mechanism_list)
-  are_equal = False
-  mech_is_in_mech_list = False
-  for other_mech in mechanism_list:
-    permutations = list(itertools.permutations(other_mech, len(other_mech)))
-    for other_mech_permutation in permutations:
-      are_equal = all(np.array_equal(arr1, arr2) for arr1, arr2 in zip(mech_i, other_mech_permutation))
-      if are_equal == True:
-        #print(are_equal, mech_i, other_mech, other_mech_permutation)
-        #print("permutations =", permutations)
-        mech_is_in_mech_list = True
-        continue #sys.exit()
-  #if are_equal == True:
-  #if is_in_list == True:
-    #return True
-  #else:
-  return mech_is_in_mech_list 
+            # If we exit the loop without a break, mutation was not possible
+            print(f"Warning: Could not find valid mutation for mechanism {mech_idx}, reaction {reaction_idx} after {max_attempts} attempts.")
 
+def array_not_in_list(
+    arr: np.ndarray,
+    list_of_arrays: List[np.ndarray]
+) -> bool:
+    """
+    Checks if an array is not present in a list of arrays.
+    """
+    for other_arr in list_of_arrays:
+        if np.array_equal(arr, other_arr):
+            return False
+    return True
 
+def species_in_reaction(
+    species_included: np.ndarray,
+    reaction: np.ndarray,
+    n_targets: int
+) -> np.ndarray:
+    """
+    Updates the array of included species based on their presence in the given reaction.
 
-def array_not_in_list(arr, list_of_arrays):
-  """Checks if an array is not present in a list of arrays."""
+    Parameters:
+        species_included (np.ndarray): Boolean array indicating which species are currently included.
+        reaction (np.ndarray): Array representing a reaction (first half: reactants, second half: products).
+        n_targets (int): Number of species.
 
-  for other_arr in list_of_arrays:
-      if (arr == other_arr).all():
-          return False
-  return True
-  
-def remove_one_duplicate(arr):
-    """Removes one instance of each duplicate element from a NumPy array."""
+    Returns:
+        np.ndarray: Updated boolean array indicating which species are involved in the mechanism.
+    """
+    updated = np.copy(species_included)
+    for si in range(n_targets):
+        if reaction[si] != 0 or reaction[si + n_targets] != 0:
+            updated[si] = True
+    return updated
 
-    unique, indices = np.unique(arr, return_index=True)
-    return arr[np.sort(indices)]
+def mech_check(
+    mechanism_list: List[List[np.ndarray]],
+    mech_i: List[np.ndarray]
+) -> bool:
+    """
+    Checks if a mechanism is already present in a list of mechanisms,
+    considering all possible reaction orders.
 
+    Parameters:
+        mechanism_list (List[List[np.ndarray]]): List of mechanisms (each a list of reactions).
+        mech_i (List[np.ndarray]): The mechanism to check.
 
-# Example usage
-#mechanism_list = [...]  # List of current mechanisms with their fitness errors
-#num_mechs = self.num_mechs
-#prev_gen_count = self.prev_gen
-#crossover_prob = 0.8
-#new_mechs = generate_new_mechs(mechanism_list, num_mechs, prev_gen_count, crossover_prob)
+    Returns:
+        bool: True if mech_i is present in mechanism_list (up to reaction order), else False.
+    """
+    for other_mech in mechanism_list:
+        if len(other_mech) != len(mech_i):
+            continue  # Mechanisms of different lengths cannot be equal
+        # Check all permutations of other_mech for equality with mech_i
+        for permuted_mech in itertools.permutations(other_mech):
+            if all(np.array_equal(r1, r2) for r1, r2 in zip(mech_i, permuted_mech)):
+                return True
+    return False
+
+    # --- Example Usage ---
+if __name__ == "__main__":
+
+    # 1. Define sample reactions
+    # Reactions are represented as NumPy arrays. First half are reactants, second half products.
+    # E.g., [1, 0, 0, 0, 1, 0, 0, 0] represents A -> B (assuming A is species 0, B is species 1).
+    reaction_A_to_B = np.array([1, 0, 0, 0, 1, 0, 0, 0], dtype=int)  # A -> B
+    reaction_B_to_C = np.array([0, 1, 0, 0, 0, 1, 0, 0], dtype=int)  # B -> C
+    reaction_C_to_A = np.array([0, 0, 1, 0, 1, 0, 0, 0], dtype=int)  # C -> A
+    reaction_AB_to_C = np.array([1, 1, 0, 0, 0, 0, 1, 0], dtype=int)  # A + B -> C
+
+    # 2. Create a reaction list
+    reactions_list = [reaction_A_to_B, reaction_B_to_C, reaction_C_to_A, reaction_AB_to_C]
+
+    # 3. Create initial mechanisms
+    # Each mechanism is a list of reaction arrays.
+    initial_mechanism1 = [reaction_A_to_B, reaction_B_to_C]
+    initial_mechanism2 = [reaction_C_to_A, reaction_AB_to_C]
+    mech_list = [initial_mechanism1, initial_mechanism2]
+
+    # 4. Simulate sorted mechanism IDs (replace with your actual fitness sorting)
+    mech_ids_sorted = [(0,), (1,)]  # Indices representing sorted mechanisms
+
+    # 5. Set genetic algorithm parameters
+    num_new_mechs = 2
+    selection_pressure = 0.2
+    upper_limit = 4  # Max reactions per mechanism
+    lower_limit = 1  # Min reactions per mechanism
+
+    # 6. Generate new mechanisms
+    prev_gen_mechs = mech_list  # The current list becomes the previous generation for demonstration
+    new_mechs = generate_new_mechanism(
+        mech_ids_sorted, mech_list, prev_gen_mechs, num_new_mechs,
+        selection_pressure, upper_limit, lower_limit
+    )
+
+    print("Original mechanisms:", mech_list)
+    print("New mechanisms:", new_mechs)
+
+    # 7. Apply mutations
+    mutation_probability = 0.1
+    generate_mutations(mech_list, mutation_probability, reactions_list)  # mech_list is modified in place
+
+    print("Mechanisms after mutation:", mech_list)
