@@ -176,7 +176,7 @@ def generate_mutations(
         # Try to find a valid new reaction to replace the selected one
         for attempt in range(MAX_ATTEMPTS):
             new_reaction_idx = np.random.randint(0, len(reactions_list))
-            new_reaction = reactions_list[new_reaction_idx]
+            new_reaction = reactions_list[new_reaction_idx][0]
             if array_not_in_list(new_reaction, selected_mech):
                 temp_species_included = species_in_reaction(species_included, new_reaction, number_of_species)
                 if np.all(temp_species_included):
@@ -208,18 +208,21 @@ def species_in_reaction(
     Updates the array of included species based on their presence in the given reaction.
 
     Parameters:
-        species_included (np.ndarray): Boolean array indicating which species are currently included.
-        reaction (np.ndarray): Array representing a reaction (first half: reactants, second half: products).
-        N_TARGETS (int): Number of species.
+    - species_included (np.ndarray): Boolean array indicating which species are currently included.
+    - reaction (np.ndarray): Array representing a reaction (first half: reactants, second half: products).
+    - N_TARGETS (int): Number of species.
 
     Returns:
-        np.ndarray: Updated boolean array indicating which species are involved in the mechanism.
+    - np.ndarray: Updated boolean array indicating which species are involved in the mechanism.
+    Notes:
+    - The function marks species as included if they have a non-zero coefficient in either the reactants
+        or products of the reaction.
     """
-    updated = np.copy(species_included)
+    species_included_updated = np.copy(species_included)
     for si in range(N_TARGETS):
         if reaction[si] != 0 or reaction[si + N_TARGETS] != 0:
-            updated[si] = True
-    return updated
+            species_included_updated[si] = True
+    return species_included_updated
 
 def mech_check(
     mechanism_list: List[List[np.ndarray]],
