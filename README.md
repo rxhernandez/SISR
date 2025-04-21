@@ -18,12 +18,12 @@ A stoichiometrically-informed method to fit the rate constants in a reaction mec
 It returns a symbolic chemical reaction mechanism, the rate constant for each reaction in the mechanism, and the kinetic equations that describe the chemical process under examination.
 
 ## Installation
-``bash
+```bash
 git clone https://github.com/...
 cd ...
 pip install -r requirements.txt
 (end)
-''
+```
 
 <hr>
 
