@@ -9,8 +9,8 @@ import matplotlib.mlab as mlab
 from pylab import *
 
 sys.path.append(os.path.abspath('../src'))
-from Reaction_Mechanism_Generator import reaction_mechanism_generator as rmg
-from Reaction_Mechanism_Generator import reaction_system
+from reaction_mechanism_generator import ReactionMechanismGenerator as rmg
+from reaction_mechanism_generator import reaction_system
 
 
 #from mech_plot import plot_mechanism
