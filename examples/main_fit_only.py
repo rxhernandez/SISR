@@ -8,9 +8,11 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 from pylab import *
 
-sys.path.append(os.path.abspath('../src'))
-from reaction_mechanism_generator import ReactionMechanismGenerator as rmg
-from reaction_mechanism_generator import reaction_system
+#sys.path.append(os.path.abspath('../src'))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.reaction_mechanism_generator import ReactionMechanismGenerator as rmg
+from src.reaction_mechanism_generator import reaction_system
 
 
 #from mech_plot import plot_mechanism
@@ -96,13 +98,13 @@ fraction_of_mechanisms_passed_on = 0.1
 
 
 mechanism_generator = rmg(order = 2, num_generations = number_of_generations, num_mech_per_gen = mechanisms_per_generation, max_rxns_per_mech = max_rxns_per_mech,min_rxns_per_mech = min_rxns_per_mech, from_previous_generation = fraction_of_mechanisms_passed_on)
-mechanism_generator, mech_list = mechanism_generator.fit(x_test,t_test)
+mechanism_generator = mechanism_generator.fit(x_test,t_test)
 
 ###########################################################################
-ks = list(mech_list[1])
+ks = mechanism_generator.rate_constants
 print("Predicted rates = ", ks)
 
-rm = list(mech_list[2])
+rm = list(mechanism_generator.reaction_mechanism)
 
 def odes(t, y):
     return reaction_system(t, y, rm, ks)

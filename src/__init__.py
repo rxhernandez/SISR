@@ -1,4 +1,7 @@
-__author__ = "MAPB, GTC, RH"
+__author__ = "Manuel Palma Banos, Rigoberto Hernandez, Galen T. Craven"
 __license__ = "MIT"
-__all__ = ["idk what goes here yet"]
+__all__ = ["genetic_algorithm", "reaction_mechanism_generator"]
 __version__ = '0.0.1'
+
+from . import genetic_algorithm
+from . import reaction_mechanism_generator
