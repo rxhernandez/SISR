@@ -46,6 +46,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
         self.generator.MIN_RXN = 1
         self.generator.N_TARGETS = 3
 
+
     def test_initialization(self):
         """
         Test that the ReactionMechanismGenerator initializes correctly.
@@ -55,6 +56,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
         self.assertEqual(self.generator.NUM_MECHS, 10)
         self.assertEqual(self.generator.PREV_GEN, 0.2)
         self.assertTrue(self.generator.include_bias)
+
 
     def test_invalid_initialization(self):
         """
@@ -66,6 +68,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
             ReactionMechanismGenerator(max_ratio=0)
         with self.assertRaises(ValueError):
             ReactionMechanismGenerator(min_rxns_per_mech = 2,max_rxns_per_mech = 1)
+
 
     def test_generate_reactions(self):
         """
@@ -121,6 +124,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
                     self.assertTrue(np.all((reaction[:self.generator.N_TARGETS] >= 0) & (reaction[:self.generator.N_TARGETS] <= self.generator.ORDER)))
                     self.assertTrue(np.all((reaction[self.generator.N_TARGETS:] >= 0) & (reaction[self.generator.N_TARGETS:] <= self.generator.MAX_STOICH*self.generator.ORDER)))
 
+
     def test_construct_matrix(self):
         """
         Test the _construct_matrix method.
@@ -132,6 +136,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
         self.assertIsNotNone(matrix)
         self.assertEqual(np.array(matrix).shape[0], 2)
         self.assertEqual(np.array(matrix).shape[1], 2 * self.generator.N_TARGETS)
+
 
     def test_fit_coefficients(self):
         """
@@ -181,6 +186,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
                 S_dot_max=self.S_dot_max,
                 time=self.X
             )
+
 
     def test_update_best_mechs(self):
         """
@@ -232,6 +238,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
         self.assertEqual(np.array(best_mechs[0][0]).all(), np.array(mech1[0]).all())
         self.assertEqual(np.array(best_mechs[1][0]).all(), np.array(mech4[0]).all())
 
+
     def test_evolve_population(self):
         """
         Test the _evolve_population method.
@@ -243,7 +250,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
         population = [self.mech1,self.mech2]
 
         # Call the function
-        best_mechs, ks, rm = self.generator._evolve_population(
+        best_mechs, ks, rm, mse = self.generator._evolve_population(
             population,
             self.S,
             self.X,
@@ -255,10 +262,11 @@ class TestReactionMechanismGenerator(unittest.TestCase):
         self.assertIsNotNone(best_mechs)
         self.assertTrue(len(best_mechs) == int(self.generator.PREV_GEN * self.generator.NUM_MECHS))
 
-        # Test 2: Check that ks and rm are generated correctly
+        # Test 2: Check that ks, rm, mse are generated correctly
         self.assertIsNotNone(ks)
         self.assertIsNotNone(rm)
         self.assertTrue(len(ks) == len(rm))
+        self.assertIsInstance(mse, float)
 
         # Test 3: Check best_mechs are in the expected format
         for mechanism in best_mechs:
@@ -269,6 +277,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
                 self.assertEqual(reaction.shape[0], 2 * self.generator.N_TARGETS)
                 self.assertTrue(np.all((reaction[:self.generator.N_TARGETS] >= 0) & (reaction[:self.generator.N_TARGETS] <= self.generator.ORDER)))
                 self.assertTrue(np.all((reaction[self.generator.N_TARGETS:] >= 0) & (reaction[self.generator.N_TARGETS:] <= self.generator.MAX_STOICH*self.generator.ORDER)))
+
 
     def test_reactant_concentration(self):
         """

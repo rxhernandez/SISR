@@ -297,7 +297,9 @@ class ReactionMechanismGenerator():
 
             # Output enlapsed time
             elapsed = real_time.time() - start
-            logging.info(f"Generation {gen_i:03d} completed in {elapsed:.2f}s")
+            hours, rem = divmod(int(elapsed), 3600)
+            minutes, seconds = divmod(rem, 60)
+            logging.info(f"Generation {(gen_i+1):d}/{self.NUM_GENS:d} completed in {hours:02d}:{minutes:02d}:{seconds:02d}")
             logging.debug(f"Best mechanism: {best_mechs[0][0]} with MSE {best_mechs[0][2]}")
 
         out_file.close()
@@ -551,7 +553,9 @@ class ReactionMechanismGenerator():
         )
 
         elapsed = real_time.time() - start
-        logging.info(f"Time taken for evolution: {elapsed:.2f} seconds")
+        hours, rem = divmod(int(elapsed), 3600)
+        minutes, seconds = divmod(rem, 60)
+        logging.info(f"Time taken for evolution: {hours:02d}:{minutes:02d}:{seconds:02d}")
 
         # 4. Extract best mechanism and its coefficients
         best_mechs, rate_consts, reaction_mech, best_mse = mechanism_list

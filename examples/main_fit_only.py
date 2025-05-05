@@ -8,9 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 from pylab import *
 
-#sys.path.append(os.path.abspath('../src'))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+sys.path.append(os.path.abspath('../src'))
 from src.reaction_mechanism_generator import ReactionMechanismGenerator as rmg
 from src.reaction_mechanism_generator import reaction_system
 
@@ -120,7 +118,7 @@ concentrations = sol.y
 
 plt.plot(sol_time, concentrations[0],ls = '--', lw = 3, label = "A")
 plt.plot(sol_time, concentrations[1],ls = '--', lw = 3, label = "B")
-
+plt.close()
 out_file=open("./fit_data.txt", "w") #windows
 i = 0
 while i<len(sol_time):
