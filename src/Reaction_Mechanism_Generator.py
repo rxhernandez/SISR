@@ -209,7 +209,7 @@ class ReactionMechanismGenerator():
         reaction_list: List[np.ndarray],
         out_file_path: str,
         mech_file_path: str
-    ) -> Tuple[List[Any], np.ndarray, List[np.ndarray]]:
+    ) -> Tuple[List[Any], np.ndarray, List[np.ndarray], float]:
         """
         Evolve the population of mechanisms using a genetic algorithm.
 
@@ -233,6 +233,7 @@ class ReactionMechanismGenerator():
         best_mechs: List[Any] = []
         rate_consts: np.ndarray = np.array([])
         reaction_mech: List[np.ndarray] = []
+        best_mse = 0
 
         # Estimate k values using average logarithmic slope
         k_arr = [np.abs(estimate_k_linearly(X, np.array(S)[:, yi])) for yi in range(np.array(S).shape[1])]
@@ -264,6 +265,7 @@ class ReactionMechanismGenerator():
                     lowest_error_gen = gen_i
                     rate_consts = rate_coeff
                     reaction_mech = reaction_mechanism
+                    best_mse = mse
                 mech_error[ind] = [ind, rate_coeff, mse]
 
             sorted_mech_error = sorted(mech_error, key=lambda x: x[-1])
@@ -300,7 +302,7 @@ class ReactionMechanismGenerator():
 
         out_file.close()
         mech_file.close()
-        return best_mechs, rate_consts, reaction_mech
+        return best_mechs, rate_consts, reaction_mech, best_mse
 
 
     def _construct_matrix(
@@ -552,9 +554,10 @@ class ReactionMechanismGenerator():
         logging.info(f"Time taken for evolution: {elapsed:.2f} seconds")
 
         # 4. Extract best mechanism and its coefficients
-        best_mechs, rate_consts, reaction_mech = mechanism_list
+        best_mechs, rate_consts, reaction_mech, best_mse = mechanism_list
         self.reaction_mechanism = reaction_mech
         self.rate_constants = rate_consts
+        self.mse = best_mse
         return self
 
 

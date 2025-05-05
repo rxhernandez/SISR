@@ -91,9 +91,9 @@ out_file.close()
 
 # rmg inputs
 number_of_generations = 20
-mechanisms_per_generation = 500
-min_rxns_per_mech = 2
-max_rxns_per_mech = 2
+mechanisms_per_generation = 100
+min_rxns_per_mech = 5
+max_rxns_per_mech = 5
 fraction_of_mechanisms_passed_on = 0.1
 
 
@@ -105,7 +105,8 @@ ks_fit = mechanism_generator.rate_constants
 print("Predicted rates = ", ks_fit)
 
 rm = list(mechanism_generator.reaction_mechanism)
-
+print("Predicted mechanism = ", rm)
+print("Mean Square Error = ", mechanism_generator.mse)
 def odes(t, y):
     return reaction_system(t, y, rm, ks_fit)
 
