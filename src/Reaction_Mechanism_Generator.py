@@ -89,10 +89,6 @@ class ReactionMechanismGenerator():
 
         Returns
         - reaction_list (array-like): An array which contains reactions (as a numpy array).
-
-        Raises
-        - ValueError: If the sum of assigned probabilities does not equal 1
-        within the specified tolerance.
         """
         # if N_targets is set to 0, return an empty list
         if self.N_TARGETS == 0:
@@ -452,30 +448,26 @@ class ReactionMechanismGenerator():
         next_reaction_id = 0
 
         for mech in all_mechs:
-            try:
-                # Generate a unique hash for this mechanism's reaction combination
-                rxn_ids = []
+            # Generate a unique hash for this mechanism's reaction combination
+            rxn_ids = []
 
-                # Convert each reaction into a immutable type (tuple) for hashing
-                for rxn in mech[0]:
-                    rxn_tuple = tuple(rxn.tolist()) if hasattr(rxn, 'tolist') else tuple(rxn)
+            # Convert each reaction into a immutable type (tuple) for hashing
+            for rxn in mech[0]:
+                rxn_tuple = tuple(rxn.tolist()) if hasattr(rxn, 'tolist') else tuple(rxn)
 
-                    # Get or assign a unique ID for the reaction
-                    if rxn_tuple not in reation_to_id:
-                        reation_to_id[rxn_tuple] = next_reaction_id
-                        next_reaction_id += 1
-                    rxn_ids.append(reation_to_id[rxn_tuple])
+                # Get or assign a unique ID for the reaction
+                if rxn_tuple not in reation_to_id:
+                    reation_to_id[rxn_tuple] = next_reaction_id
+                    next_reaction_id += 1
+                rxn_ids.append(reation_to_id[rxn_tuple])
 
-                # Create a hashable representation of the mechanism using reaction IDs
-                mech_hash = frozenset(rxn_ids)
+            # Create a hashable representation of the mechanism using reaction IDs
+            mech_hash = frozenset(rxn_ids)
 
-                if mech_hash not in seen_mechs_hashes:
-                    seen_mechs_hashes.add(mech_hash)
-                    unique_mechs.append(mech)
+            if mech_hash not in seen_mechs_hashes:
+                seen_mechs_hashes.add(mech_hash)
+                unique_mechs.append(mech)
 
-            except Exception as e:
-                print(f"Error processing mechanism: {mech}, error: {e}")
-                continue
         # Sort the unique mechanisms by their performance metric: MSE
         unique_mechs.sort(key=lambda x: x[-1])
 
@@ -537,11 +529,11 @@ class ReactionMechanismGenerator():
 
         # Number of target species
         self.N_TARGETS = np.array(S).shape[1]
-        logging.info("number of species  = ", self.N_TARGETS)
+        logging.info(f"Number of species  = {self.N_TARGETS}")
 
         # 1. Generate all possible reactions
         reaction_list = self._generate_reactions()
-        logging.info("number of rxns = ", len(reaction_list))
+        logging.info(f"Number of reactions = {len(reaction_list):d}")
 
         # 2. Initialize population
         population = self._initialize_population(reaction_list)

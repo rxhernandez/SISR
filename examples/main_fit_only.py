@@ -101,13 +101,13 @@ mechanism_generator = rmg(order = 2, num_generations = number_of_generations, nu
 mechanism_generator = mechanism_generator.fit(x_test,t_test)
 
 ###########################################################################
-ks = mechanism_generator.rate_constants
-print("Predicted rates = ", ks)
+ks_fit = mechanism_generator.rate_constants
+print("Predicted rates = ", ks_fit)
 
 rm = list(mechanism_generator.reaction_mechanism)
 
 def odes(t, y):
-    return reaction_system(t, y, rm, ks)
+    return reaction_system(t, y, rm, ks_fit)
 
 
 # Solve the system using solve_ivp

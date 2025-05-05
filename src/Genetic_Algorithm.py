@@ -23,6 +23,9 @@ def crossover(
 
     Returns:
     - Tuple[List[np.ndarray], List[np.ndarray]]: Two valid offspring reaction networks
+
+    Raises:
+    - RuntimeError: If valid offspring cannot be generated after a set number of attempts.
     """
 
     # Combine parent reaction pools and remove duplicate reactions
