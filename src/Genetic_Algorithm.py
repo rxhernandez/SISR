@@ -116,7 +116,13 @@ def next_generation_mechanism(
 
     Returns:
     - next_gen_mechs (array-like): List of newly generated mechanisms.
+
+    Raise:
+    - ValueError: If the number of mechanisms in prev_gen_mechs is less than 2.
     """
+
+    if len(prev_gen_mechs) < 2:
+        raise ValueError("At least two mechanisms are required to generate a new generation.")
 
     next_gen_mechs = []
     num_mechs = len(prev_gen_mechs)
@@ -130,8 +136,9 @@ def next_generation_mechanism(
     # Generate new mechanisms through crossover until desired number is reached
     while len(next_gen_mechs) < NUM_NEW_MECHS:
         # Select two distinct parent mechanisms based on selection probabilities
-        parent_indices = np.random.choice(
-            range(num_mechs), size=2, replace=False, p=probabilities
+        rng = np.random.default_rng()
+        parent_indices = rng.choice(
+            num_mechs, size=2, replace=False, p=probabilities
         )
         parent_id1, parent_id2 = mech_ids_sorted[parent_indices[0]], mech_ids_sorted[parent_indices[1]]
         parent1 = mech_list[parent_id1[0]]
@@ -147,8 +154,7 @@ def next_generation_mechanism(
             next_gen_mechs.extend([offspring1, offspring2])
         else:
             logger.debug(
-                "Overlap detected in crossover: finished generating",
-                len(next_gen_mechs), "of", NUM_NEW_MECHS
+                f"Overlap detected in crossover: finished generating {len(next_gen_mechs)} of {NUM_NEW_MECHS}"
             )
 
     # Truncate to the requested number of mechanisms (in case of over-generation)
