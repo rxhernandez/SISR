@@ -1,11 +1,11 @@
 import os
 import sys
-import time as real_time
 import random
 import logging
 import itertools
 import numpy as np
 from math import comb
+import time as real_time
 import scipy.constants as sp
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
