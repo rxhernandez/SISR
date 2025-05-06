@@ -26,33 +26,32 @@ def normalize_probs(probs):
     return probs / np.sum(probs)
 
 def derivatives(t, concentration, k0, k1, k2):
-    A, B, C, D = concentration
-    dAdt =  -k0*A
-    dBdt =  k0*A - k1*B
-    dCdt =  k1*B - k2*C
-    dDdt =  k2*C
-    return [dAdt, dBdt, dCdt, dDdt]
+    E, S, ES, P = concentration
+    dEdt =  -k0*E*S + k1*ES + k2*ES
+    dSdt =  -k0*E*S + k1*ES
+    dESdt =  k0*E*S - (k1 + k2)*ES
+    dPdt = k2*ES
+    return [dEdt, dSdt, dESdt, dPdt]
 
 
 # Seed the random number generators for reproducibility
 np.random.seed(100)
 
 # Constants
-Num_particles = 1
-total_time = 100000
-Dt = 1e1
+total_time = 6
+Dt = 1e-2
 
 # Rate constants
-k0 = 6.312e-5
-k1 = 1.262e-4
-k2 = 3.156e-4
+k0 = 1
+k1 = 0.1
+k2 = 1
 ks = (k0, k1, k2)
-print(*ks)
 print("true rate constants = ", *ks)
 
 # Initial distribution and concentration
-init_dist = normalize_probs(np.array([1.00, 0.00, 0.00, 0.00]))
-init_conc = init_dist * 2
+init_dist = np.array([0.40, 1.00, 0.00,0.00])
+init_conc = init_dist*10
+print("true initial concentrations = ", init_conc)
 time = np.arange(0, total_time+Dt, Dt)
 
 # Solve the system using solve_ivp
@@ -63,7 +62,8 @@ concentrations = sol.y
 
 t_test = sol_time
 x_test = concentrations.T
+print("true final concentrations = ", x_test[-1])
 
 data = np.concatenate((sol_time.reshape(-1, 1), concentrations.T), axis=1)
 # Save the data to a file
-np.savetxt("Linear_data.txt", data)
+np.savetxt('MM_data.txt', data, header='Time A B', fmt='%.6e')

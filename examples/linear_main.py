@@ -34,7 +34,7 @@ for i in range(concentrations.shape[0]):
     plt.plot(t_test[::step], concentrations[i][::step],'-',markersize = 11,markeredgewidth = 1.0,markeredgecolor = 'w', lw=2.0, label = f"{i}")
 plt.show()
 
-print("Reaction Mechanism")
+print("True Reaction Mechanism")
 print("A -> B, 6.312e-5")
 print("B -> C, 1.262e-4")
 print("C -> D, 3.156e-4")
@@ -75,4 +75,4 @@ plt.close()
 
 # Output data file as txt with column 1 with time and next columns with concentrations
 output_data = np.column_stack((sol.t, concentrations.T))
-np.savetxt('fitted_LK_data.txt', output_data, header='Time A B', fmt='%.6e')
+np.savetxt('fitted_linear_data.txt', output_data, header='Time A B', fmt='%.6e')

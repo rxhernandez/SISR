@@ -24,33 +24,34 @@ def import_data(filename):
     return t_test, x_test
 
 
-t_test, x_test = import_data("LK_data.txt")
+t_test, x_test = import_data("MM_data.txt")
 concentrations = x_test.T
 init_conc = concentrations[:, 0]
 
 plt.figure()
 step = 1
-plt.plot(t_test[::step], concentrations[0][::step],'-',markersize = 11,markeredgewidth = 1.0,markeredgecolor = 'w', lw=2.0,color="k")
-plt.plot(t_test[::step], concentrations[1][::step],'-',markersize = 11,markeredgewidth = 1.0,markeredgecolor = 'w', lw=2.0,color="k")
+for i in range(concentrations.shape[0]):
+    plt.plot(t_test[::step], concentrations[i][::step],'-',markersize = 11,markeredgewidth = 1.0,markeredgecolor = 'w', lw=2.0, label = f"{i}")
+plt.xlabel('Time')
+plt.ylabel('Concentration')
+plt.legend()
 plt.show()
+plt.close()
 
 print("True Reaction Mechanism")
-print("2A -> 0, 0.1")
-print("2B -> 0, 0.1")
-print("2A -> A, 1.0")
-print("A + B -> 2B, 1.0")
-print("B -> 0, 1.0")
-
+print("2A -> 2B, 1.319e-6")
+print("B -> C, 9.125e-6")
+print("B+C -> 2A, 2.756e-8")
 
 # rmg inputs
 number_of_generations = 20
 mechanisms_per_generation = 100
-min_rxns_per_mech = 5
-max_rxns_per_mech = 5
-fraction_of_mechanisms_passed_on = 0.1
+min_rxns_per_mech = 3
+max_rxns_per_mech = 3
+fraction_of_mechanisms_passed_on = 0.2
 
 
-mechanism_generator = rmg(order = 2, num_generations = number_of_generations, num_mech_per_gen = mechanisms_per_generation, max_rxns_per_mech = max_rxns_per_mech,min_rxns_per_mech = min_rxns_per_mech, from_previous_generation = fraction_of_mechanisms_passed_on)
+mechanism_generator = rmg(order = 2, num_generations = number_of_generations, num_mech_per_gen = mechanisms_per_generation, max_rxns_per_mech = max_rxns_per_mech,min_rxns_per_mech = min_rxns_per_mech, from_previous_generation = fraction_of_mechanisms_passed_on, verbosity = 1)
 mechanism_generator = mechanism_generator.fit(x_test,t_test)
 
 ###########################################################################
@@ -67,10 +68,15 @@ def odes(t, y):
 sol = solve_ivp(odes, [0, t_test[-1]], init_conc, t_eval=t_test)
 concentrations = sol.y
 
-plt.plot(sol.t, concentrations[0],ls = '--', lw = 3, label = "A")
-plt.plot(sol.t, concentrations[1],ls = '--', lw = 3, label = "B")
+plt.figure()
+for i in range(concentrations.shape[0]):
+    plt.plot(sol.t, concentrations[0],ls = '--', lw = 3, label = f"{i}")
+
+plt.xlabel('Time')
+plt.ylabel('Concentration')
+plt.legend()
 plt.close()
 
 # Output data file as txt with column 1 with time and next columns with concentrations
 output_data = np.column_stack((sol.t, concentrations.T))
-np.savetxt('fitted_LK_data.txt', output_data, header='Time A B', fmt='%.6e')
+np.savetxt('fitted_nonlinear_data.txt', output_data, header='Time A B', fmt='%.6e')
