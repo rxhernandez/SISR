@@ -23,7 +23,7 @@ It returns a symbolic chemical reaction mechanism, the rate constant for each re
 ```bash
 git clone https://github.com/rxhernandez/SISR
 cd SISR
-pip install -r requirements.txt
+./install.sh
 ```
 
 <hr>
