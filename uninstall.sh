@@ -12,5 +12,9 @@ fi
 # Remove build artifacts
 rm -rf python_venvs
 rm -rf build dist *.egg-info
+rm -rf src/*.egg-info
+rm -rf src/SISR/__pycache__
+rm -rf tests/__pycache__
+rm -rf tests/*.txt
 
 echo "Cleanup complete."
