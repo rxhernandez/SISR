@@ -36,7 +36,8 @@ class ReactionMechanismGenerator():
         min_rxns_per_mech = 5, # minimum reactions per mechanisms
         from_previous_generation=0.2, # fraction of previous generation to pass on to next generation
         mutation_prob = 0.1, # fraction of the individuals of a given generation that could go thru mutations
-        verbosity=1
+        verbosity=1, # verbosity level for logging (0=WARNING, 1=INFO, 2=DEBUG)
+        is_bounded=False # whether to use bounded optimization for fitting coefficients
     ):
 
         # Input validation
@@ -74,6 +75,7 @@ class ReactionMechanismGenerator():
         self.MIN_RXN = min_rxns_per_mech
         self.P_MUTATION = mutation_prob
         self.N_TARGETS = 0
+        self.IS_BOUNDED = is_bounded
         self.reaction_mechanism: List[np.ndarray] = []
         self.rate_constants: np.ndarray = np.array([])
         self.mse = 0
@@ -408,8 +410,22 @@ class ReactionMechanismGenerator():
                                             X[r_i][s_j + len(reacts)] * k[r_i] * r_i_conc_factor)
             return pred_der
 
+        # Define bounds for the coefficients if using bounded optimization
+        if self.IS_BOUNDED:
+            bounds = (0, np.inf)
+        else:
+            bounds = (-np.inf, np.inf)
+
         # Perform least squares fitting using the `least_squares` function
-        result = least_squares(lambda k, X, y: __objective(k, X, y)[0], k0, args=(reaction_mechanism, S), loss='linear', bounds=(0, np.inf),method="trf", max_nfev = 10)#5bounds=(0, np.inf), method="trf")
+        result = least_squares(
+            lambda k, X, y: __objective(k, X, y)[0],
+            k0,
+            args=(reaction_mechanism, S),
+            loss='linear',
+            bounds=bounds,
+            method="trf",
+            max_nfev=10
+        )
         k_fit = result.x
         residuals, mse = __objective(k_fit, reaction_mechanism, S)
         return k_fit, mse
