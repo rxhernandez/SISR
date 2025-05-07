@@ -34,10 +34,15 @@ cd SISR
 source python_venvs/SISR/bin/activate
 pip list | grep SISR
 ```
+You should see the installed SISR package listed as follows:
+```
+SISR                          0.0.1
+```
 
 ### Example
 ```bash
-python examples/LK_example.py
+cd examples
+python LK_example.py
 ```
 
 ### Uninstall
