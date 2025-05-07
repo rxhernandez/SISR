@@ -43,7 +43,7 @@ python examples/LK_example.py
 ### Uninstall
 ```bash
 deactivate
-rm -rf python_venvs/SISR
+./uninstall.sh
 ```
 <hr>
 
