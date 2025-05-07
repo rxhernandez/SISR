@@ -3,6 +3,7 @@
 
 ----------------
 
+## Contents
 This repository includes the following content:
 
 Example input datasets and scripts to run the SISR code: examples/
@@ -19,13 +20,32 @@ Code for the paper: **[Stoichiometrically-informed symbolic regression for extra
 A stoichiometrically-informed method to fit the rate constants in a reaction mechanism through differential optimization and couple that fitting method with a genetic optimization approach that searches a symbolic space of possible reaction mechanisms to find the mechanism that best matches a time-series dataset of concentrations.
 It returns a symbolic chemical reaction mechanism, the rate constant for each reaction in the mechanism, and the kinetic equations that describe the chemical process under examination.
 
-## Installation
+## How to use
+
+### Installation
 ```bash
 git clone https://github.com/rxhernandez/SISR
 cd SISR
 ./install.sh
 ```
 
+### Verification
+```bash
+source python_venvs/SISR/bin/activate
+pip list | grep SISR
+```
+
+### Example
+```bash
+source python_venvs/SISR/bin/activate
+python examples/Sequential_example.py
+```
+
+### Uninstall
+```bash
+deactivate
+rm -rf python_venvs/SISR
+```
 <hr>
 
 Citing

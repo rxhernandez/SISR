@@ -1,0 +1,13 @@
+LICENSE
+README.md
+pyproject.toml
+src/__init__.py
+src/genetic_algorithm.py
+src/reaction_mechanism_generator.py
+src/SISR.egg-info/PKG-INFO
+src/SISR.egg-info/SOURCES.txt
+src/SISR.egg-info/dependency_links.txt
+src/SISR.egg-info/requires.txt
+src/SISR.egg-info/top_level.txt
+tests/test_genetic_algorithm.py
+tests/test_reaction_mechanism_generator.py

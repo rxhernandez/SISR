@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "SISR"
 requires-python = ">=3.11"
-dependencies = ["numpy >= 1.25.2, <2.2", "scipy >= 1.1, <1.15"]
+dependencies = ["numpy >= 1.25.2", "scipy >= 1.1"]
 authors = [
     { name = "M. Palma Banos", email = "manupb99@proton.me" },
     { name = "J. D. Kress" },
@@ -15,7 +15,7 @@ authors = [
 ]
 maintainers = [{ name = "M. Palma Banos", email = "manupb99@proton.me" }]
 description = "A stoichiometrically-informed method to fit the rate constants in a reaction mechanism through differential optimization and couple that fitting method with a genetic optimization approach that searches a symbolic space of possible reaction mechanisms to find the mechanism that best matches a time-series dataset of concentrations. It returns a symbolic chemical reaction mechanism, the rate constant for each reaction in the mechanism, and the kinetic equations that describe the chemical process under examination."
-readme = { file = "README.txt", content-type = "text/markdown" }
+readme = "README.md"
 keywords = [
     "symbolic regression",
     "time series analysis",
@@ -36,5 +36,9 @@ Repository = "https://github.com/rxhernandez/SISR"
 Homepage = "https://rxhernandez.github.io/SISR/"
 Documentation = "https://link_to_paper"
 
+[tool.setuptools]
+package-dir = { "" = "src" }
+py-modules = ["__init__", "genetic_algorithm", "reaction_mechanism_generator"]
+
 [tool.setuptools.dynamic]
-version = { attr = "SISR.__version__" }
+version = { attr = "__init__.__version__" }
