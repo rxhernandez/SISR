@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from src.genetic_algorithm import (
+from src.SISR.genetic_algorithm import (
     crossover,
     validate_mechanism,
     next_generation_mechanism,

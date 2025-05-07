@@ -2,8 +2,8 @@ import numpy as np
 import unittest
 from unittest.mock import patch
 from unittest.mock import Mock
-from src.reaction_mechanism_generator import ReactionMechanismGenerator
-from src.reaction_mechanism_generator import (
+from src.SISR.reaction_mechanism_generator import ReactionMechanismGenerator
+from src.SISR.reaction_mechanism_generator import (
     reactant_concentration,
     reaction_system,
     estimate_k_linearly,
@@ -255,8 +255,8 @@ class TestReactionMechanismGenerator(unittest.TestCase):
             self.S,
             self.X,
             self.reaction_list,
-            "test_rxn.txt",
-            "test_mech.txt")
+            "tests/test_rxn.txt",
+            "tests/test_mech.txt")
 
         # Test 1: Check that the best_mechs are generated correctly
         self.assertIsNotNone(best_mechs)

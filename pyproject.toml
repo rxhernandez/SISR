@@ -1,11 +1,15 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "SISR"
 requires-python = ">=3.11"
-dependencies = ["numpy >= 1.25.2", "scipy >= 1.1"]
+dependencies = [
+    "numpy>=1.21.0,<1.26.0", # Stable range for NumPy
+    "scipy>=1.8.0,<1.12.0",  # Stable range for SciPy
+    "matplotlib>=3.5.0",     # Stable range for Matplotlib
+]
 authors = [
     { name = "M. Palma Banos", email = "manupb99@proton.me" },
     { name = "J. D. Kress" },
@@ -37,8 +41,8 @@ Homepage = "https://rxhernandez.github.io/SISR/"
 Documentation = "https://link_to_paper"
 
 [tool.setuptools]
+packages = ["SISR"]
 package-dir = { "" = "src" }
-py-modules = ["__init__", "genetic_algorithm", "reaction_mechanism_generator"]
 
 [tool.setuptools.dynamic]
-version = { attr = "__init__.__version__" }
+version = { attr = "SISR.__version__" }

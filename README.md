@@ -37,8 +37,7 @@ pip list | grep SISR
 
 ### Example
 ```bash
-source python_venvs/SISR/bin/activate
-python examples/Sequential_example.py
+python examples/LK_example.py
 ```
 
 ### Uninstall

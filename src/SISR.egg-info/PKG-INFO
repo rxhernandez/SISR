@@ -17,8 +17,9 @@ Classifier: Programming Language :: Python :: 3.11
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
 License-File: LICENSE
-Requires-Dist: numpy>=1.25.2
-Requires-Dist: scipy>=1.1
+Requires-Dist: numpy<1.26.0,>=1.21.0
+Requires-Dist: scipy<1.12.0,>=1.8.0
+Requires-Dist: matplotlib>=3.5.0
 Dynamic: license-file
 
 # Stochiometrically Informed Symbolic Regression (SISR)
@@ -60,8 +61,7 @@ pip list | grep SISR
 
 ### Example
 ```bash
-source python_venvs/SISR/bin/activate
-python examples/Sequential_example.py
+python examples/LK_example.py
 ```
 
 ### Uninstall
