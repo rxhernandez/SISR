@@ -28,8 +28,14 @@ init_conc = concentrations[:, 0]
 plt.figure()
 step = 1
 for i in range(concentrations.shape[0]):
-    plt.plot(t_test[::step], concentrations[i][::step],'-',markersize = 11,markeredgewidth = 1.0,markeredgecolor = 'w', lw=2.0, label = f"{i}")
-plt.show()
+    plt.plot(t_test[::step], concentrations[i][::step],'-',markersize = 11,markeredgewidth = 1.0,markeredgecolor = 'w', lw=2.0)
+plt.xlabel("Time (s)", fontsize=20)
+plt.ylabel("Concentration (mol/L)", fontsize=20)
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
+plt.legend(["A", "B", "C", "D"], fontsize=20)
+plt.grid()
+plt.savefig("Sequential_concentration.png", dpi=300, bbox_inches='tight')
 
 print("True Reaction Mechanism")
 print("A -> B, 6.312e-5")
@@ -63,12 +69,15 @@ concentrations = sol.y
 
 plt.figure()
 for i in range(concentrations.shape[0]):
-    plt.plot(sol.t, concentrations[0],ls = '--', lw = 3, label = f"{i}")
+    plt.plot(sol.t, concentrations[0],ls = '--', lw = 3)
 
-plt.xlabel('Time')
-plt.ylabel('Concentration')
-plt.legend()
-plt.close()
+plt.xlabel("Time (s)", fontsize=20)
+plt.ylabel("Concentration (mol/L)", fontsize=20)
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
+plt.legend(["A", "B", "C", "D"], fontsize=20)
+plt.grid()
+plt.savefig("Sequential_concentration_fit.png", dpi=300, bbox_inches='tight')
 
 # Output data file as txt with column 1 with time and next columns with concentrations
 output_data = np.column_stack((sol.t, concentrations.T))
