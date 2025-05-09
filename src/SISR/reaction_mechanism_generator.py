@@ -379,8 +379,10 @@ class ReactionMechanismGenerator():
         elif S is None or S_dot is None:
             raise ValueError("S and S_dot must be provided for fitting coefficients.")
 
-        # Define the objective function for least squares fitting
         def __objective(k, X, y):
+            '''
+            Define the objective function for least squares fitting.
+            '''
             predicted_derivatives = __predict_derivative(k, X, y)
             normalized_predicted_derivatives = predicted_derivatives / S_dot_max
             difference = S_dot - normalized_predicted_derivatives
@@ -388,16 +390,10 @@ class ReactionMechanismGenerator():
             mse = np.mean(np.square(difference))
             return diff_sum, mse
 
-        def __objective_complexity(X):
-            mech = X
-            complexity = 0
-            for rxn in mech:
-                complexity += np.sum(rxn)
-
-            return complexity
-
-        # Define the function to predict derivatives based on current coefficients
         def __predict_derivative(k, X, y):
+            """
+            Define the function to predict derivatives based on current coefficients.
+            """
             pred_der = np.zeros_like(y)
             for t_k in range(y.shape[0]):
                 for r_i, reaction in enumerate(X):
@@ -408,7 +404,7 @@ class ReactionMechanismGenerator():
                                             X[r_i][s_j + len(reacts)] * k[r_i] * r_i_conc_factor)
             return pred_der
 
-        # Perform least squares fitting using the `least_squares` function
+        # Perform least squares fitting
         result = least_squares(lambda k, X, y: __objective(k, X, y)[0], k0, args=(reaction_mechanism, S), loss='linear', bounds=(0, np.inf),method="trf", max_nfev = 10)#5bounds=(0, np.inf), method="trf")
         k_fit = result.x
         residuals, mse = __objective(k_fit, reaction_mechanism, S)
