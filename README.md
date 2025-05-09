@@ -3,8 +3,18 @@
 
 ----------------
 
+## Description
+----------------
+
+A stoichiometrically-informed method to fit the rate constants in a reaction mechanism through differential optimization and couple that fitting method with a genetic optimization approach that searches a symbolic space of possible reaction mechanisms to find the mechanism that best matches a time-series dataset of concentrations.
+It returns a symbolic chemical reaction mechanism, the rate constant for each reaction in the mechanism, and the kinetic equations that describe the chemical process under examination.
+
 ## Contents
-This repository includes the following content:
+----------------
+
+This repository includes the codes for the paper : **[Stoichiometrically-informed symbolic regression for extracting chemical reaction mechanisms from data](link)** (Manuel Palma Banos,Joel D. Kress,Rigoberto Hernandez,Galen T. Craven,Journal Info, Year).
+
+and the following content:
 
 Example input datasets and scripts to run the SISR code: examples/
 
@@ -14,13 +24,8 @@ Paper and associated figures: docs/
 
 The python3 based source code: src/
 
-Code for the paper: **[Stoichiometrically-informed symbolic regression for extracting chemical reaction mechanisms from data](link)** (Manuel Palma Banos,Joel D. Kress,Rigoberto Hernandez,Galen T. Craven,Journal Info, Year).
-
-## Description
-A stoichiometrically-informed method to fit the rate constants in a reaction mechanism through differential optimization and couple that fitting method with a genetic optimization approach that searches a symbolic space of possible reaction mechanisms to find the mechanism that best matches a time-series dataset of concentrations.
-It returns a symbolic chemical reaction mechanism, the rate constant for each reaction in the mechanism, and the kinetic equations that describe the chemical process under examination.
-
 ## How to use
+----------------
 
 ### Installation
 ```bash
@@ -28,6 +33,13 @@ git clone https://github.com/rxhernandez/SISR
 cd SISR
 ./install.sh
 ```
+If system was intalled correctly and unittests passed, you should see the following message:
+```
+Ran 19 tests in X.XXXs
+
+OK
+```
+
 
 ### Verification
 ```bash
