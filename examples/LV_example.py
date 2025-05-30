@@ -13,7 +13,7 @@ matplotlib.rcParams['figure.figsize'] = 6,6/1.82
 matplotlib.rcParams['axes.linewidth'] = 1.5
 matplotlib.rcParams['figure.figsize'] = 8,8/1.62
 
-# Create a function that imports the file "LK_data.txt" and returns t_test and x_test
+# Create a function that imports the file "LV_data.txt" and returns t_test and x_test
 def import_data(filename):
     data = np.loadtxt(filename)
     t_test = data[:, 0]
@@ -21,7 +21,7 @@ def import_data(filename):
     return t_test, x_test
 
 
-t_test, x_test = import_data("input_data/LK_data.txt")
+t_test, x_test = import_data("input_data/LV_data.txt")
 concentrations = x_test.T
 init_conc = concentrations[:, 0]
 
@@ -77,8 +77,8 @@ plt.ylabel("Concentration (mol/L)", fontsize=20)
 plt.xticks(fontsize=20)
 plt.yticks(fontsize=20)
 plt.grid()
-plt.savefig("LK_concentration_fit.png", dpi=300, bbox_inches='tight')
+plt.savefig("LV_concentration_fit.png", dpi=300, bbox_inches='tight')
 
 # Output data file as txt with column 1 with time and next columns with concentrations
 output_data = np.column_stack((sol.t, concentrations.T))
-np.savetxt('fitted_LK_data.txt', output_data, header='Time A B', fmt='%.6e')
+np.savetxt('fitted_LV_data.txt', output_data, header='Time A B', fmt='%.6e')
