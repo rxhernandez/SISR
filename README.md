@@ -62,7 +62,7 @@ SISR                          0.0.1
 - ### Run Example
 ```bash
 cd examples
-python LK_example.py
+python LV_example.py
 ```
 
 - ### Uninstall
