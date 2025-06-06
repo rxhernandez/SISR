@@ -73,7 +73,7 @@ for i in range(concentrations.shape[0]):
     plt.plot(sol.t, concentrations[0],ls = '--', lw = 3)
 
 plt.xlabel("Time (s)", fontsize=20)
-plt.ylabel("Concentration (mol/L)", fontsize=20)
+plt.ylabel("Concentration (mmol/L)", fontsize=20)
 plt.xticks(fontsize=20)
 plt.yticks(fontsize=20)
 plt.legend(["A", "B", "C"], fontsize=20)
