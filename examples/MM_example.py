@@ -30,7 +30,7 @@ step = 1
 for i in range(concentrations.shape[0]):
     plt.plot(t_test[::step], concentrations[i][::step],'-',markersize = 11,markeredgewidth = 1.0,markeredgecolor = 'w', lw=2.0)
 plt.xlabel("Time (s)", fontsize=20)
-plt.ylabel("Concentration (mol/L)", fontsize=20)
+plt.ylabel("Concentration (mmol/L)", fontsize=20)
 plt.xticks(fontsize=20)
 plt.yticks(fontsize=20)
 plt.legend(["A", "B", "C"], fontsize=20)
