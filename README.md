@@ -1,4 +1,4 @@
-# Stochiometrically Informed Symbolic Regression (SISR)
+# Stochiometrically-Informed Symbolic Regression (SISR)
 
 ## Description
 ----------------
