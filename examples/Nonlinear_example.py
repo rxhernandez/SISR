@@ -13,7 +13,7 @@ matplotlib.rcParams['figure.figsize'] = 6,6/1.82
 matplotlib.rcParams['axes.linewidth'] = 1.5
 matplotlib.rcParams['figure.figsize'] = 8,8/1.62
 
-# Create a function that imports the file "LK_data.txt" and returns t_test and x_test
+# Create a function that imports the file "Nonlinear_data.txt" and returns t_test and x_test
 def import_data(filename):
     data = np.loadtxt(filename)
     t_test = data[:, 0]
