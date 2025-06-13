@@ -299,7 +299,7 @@ class ReactionMechanismGenerator():
             hours, rem = divmod(int(elapsed), 3600)
             minutes, seconds = divmod(rem, 60)
             logging.info(f"Generation {(gen_i+1):d}/{self.NUM_GENS:d} completed in {hours:02d}:{minutes:02d}:{seconds:02d}")
-            logging.debug(f"Best mechanism: {best_mechs[0][0]} with MSE {best_mechs[0][2]}")
+            logging.debug(f"Best mechanism: {best_mechs[0][0]} with Rate constants {best_mechs[0][2]}")
 
         out_file.close()
         mech_file.close()
