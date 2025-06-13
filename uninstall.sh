@@ -1,20 +1,21 @@
 #!/bin/bash
+set -e
 
-# Deactivate any active virtual environment
-deactivate 2>/dev/null
+ENV_NAME="sisr-env"
 
-# Remove the virtual environment directory
-if [ -d "python_venvs/SISR" ]; then
-    echo "Removing virtual environment at python_venvs/SISR"
-    rm -rf python_venvs/SISR
+if ! command -v conda &> /dev/null; then
+    echo "conda could not be found. Please install Anaconda or Miniconda."
+    exit 1
 fi
 
-# Remove build artifacts
-rm -rf python_venvs
-rm -rf build dist *.egg-info
-rm -rf src/*.egg-info
-rm -rf src/SISR/__pycache__
-rm -rf tests/__pycache__
-rm -rf tests/*.txt
+echo "Deactivating any active conda environment..."
+conda deactivate || true
+
+if conda info --envs | grep -q "$ENV_NAME"; then
+    echo "Removing conda environment '$ENV_NAME'..."
+    conda remove -y -n $ENV_NAME --all
+else
+    echo "Conda environment '$ENV_NAME' does not exist."
+fi
 
 echo "Cleanup complete."
