@@ -53,7 +53,7 @@ max_rxns_per_mech = 5
 fraction_of_mechanisms_passed_on = 0.1
 
 
-mechanism_generator = rmg(order = 2, num_generations = number_of_generations, num_mech_per_gen = mechanisms_per_generation, max_rxns_per_mech = max_rxns_per_mech,min_rxns_per_mech = min_rxns_per_mech, from_previous_generation = fraction_of_mechanisms_passed_on)
+mechanism_generator = rmg(order = 2, num_generations = number_of_generations, num_mech_per_gen = mechanisms_per_generation, max_rxns_per_mech = max_rxns_per_mech,min_rxns_per_mech = min_rxns_per_mech, from_previous_generation = fraction_of_mechanisms_passed_on, is_bounded = True)
 mechanism_generator = mechanism_generator.fit(x_test,t_test)
 
 ###########################################################################

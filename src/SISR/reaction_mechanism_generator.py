@@ -27,7 +27,7 @@ class ReactionMechanismGenerator():
         self,
         order=1, # order of the system, provided when creating the object, else 1
         include_bias=True, # whether to include sources and sinks
-        is_bounded=False, # whether to use bounded optimization for fitting
+        is_bounded=True, # whether to use bounded optimization for fitting
         tol=1e-5,
         max_ratio = 5, # maximum difference between the log of the lowest and highest k
         num_generations=1, # number of generations

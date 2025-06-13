@@ -22,10 +22,10 @@ The repository is organized as follows:
 ## How to use
 ----------------
 
-- **Note:** The ./install.sh script will create a virtual environment in the python_venvs directory. If you have a different directory structure, please modify the script accordingly.
+- **Note:** The ./install.sh script will create a conda virtual environment. If you have a different directory structure, please modify the script accordingly.
 - **Note:** The ./install.sh script includes a unittest verification step. If you want to skip this step, you can comment out the line that runs the unittests in the script.
 - **Note:** The ./install.sh script will install the required packages in the virtual environment. It will not install them globally.
-- **Note:** The code is designed to run on Python 3.8 or higher. It has not been tested on Python 2.x.
+- **Note:** The code is designed to run on Python 3.9 or higher. It has not been tested on Python 2.x.
 - **Note:** The code is designed to run on Linux and MacOS. It has not been tested on Windows.
 
 - ### Clone SISR
@@ -40,14 +40,17 @@ cd SISR
 ```
 > If system was intalled correctly and unittests passed, you should see the following message:
 ```
-Ran 19 tests in X.XXXs
+----------------------------------------------------------------------
+Ran 19 tests in 0.042s
 
 OK
+Installation complete. To activate this environment later, run:
+  conda activate sisr-env
 ```
 
 - ### Virtual Environment
 ```bash
-source python_venvs/SISR/bin/activate
+conda activate sisr-env
 ```
 
 - ### Check Installation
@@ -67,7 +70,7 @@ python LV_example.py
 
 - ### Uninstall
 ```bash
-deactivate
+conda deactivate
 ./uninstall.sh
 ```
 

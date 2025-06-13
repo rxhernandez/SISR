@@ -143,6 +143,7 @@ class TestReactionMechanismGenerator(unittest.TestCase):
         Test the _fit_coefficients method.
         """
         # Mock k value
+        self.generator.IS_BOUNDED = True
         k = np.array([1, 2, 3])
 
         # Test 1: Basic functionality
