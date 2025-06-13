@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SISR"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 dependencies = [
     "numpy>=1.21.0,<1.26.0", # Stable range for NumPy
     "scipy>=1.8.0,<1.12.0",  # Stable range for SciPy
