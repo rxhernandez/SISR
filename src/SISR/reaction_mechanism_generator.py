@@ -27,6 +27,7 @@ class ReactionMechanismGenerator():
         self,
         order=1, # order of the system, provided when creating the object, else 1
         include_bias=True, # whether to include sources and sinks
+        is_bounded=False, # whether to use bounded optimization for fitting
         tol=1e-5,
         max_ratio = 5, # maximum difference between the log of the lowest and highest k
         num_generations=1, # number of generations
@@ -73,6 +74,7 @@ class ReactionMechanismGenerator():
         self.MAX_RXN = max_rxns_per_mech
         self.MIN_RXN = min_rxns_per_mech
         self.P_MUTATION = mutation_prob
+        self.IS_BOUNDED = is_bounded
         self.N_TARGETS = 0
         self.reaction_mechanism: List[np.ndarray] = []
         self.rate_constants: np.ndarray = np.array([])
@@ -405,7 +407,22 @@ class ReactionMechanismGenerator():
             return pred_der
 
         # Perform least squares fitting
-        result = least_squares(lambda k, X, y: __objective(k, X, y)[0], k0, args=(reaction_mechanism, S), loss='linear', bounds=(0, np.inf),method="trf", max_nfev = 10)#5bounds=(0, np.inf), method="trf")
+        # Define bounds for the coefficients if using bounded optimization
+        if self.IS_BOUNDED:
+            bounds = (0, np.inf)
+        else:
+            bounds = (-np.inf, np.inf)
+
+        # Perform least squares fitting using the `least_squares` function
+        result = least_squares(
+            lambda k, X, y: __objective(k, X, y)[0],
+            k0,
+            args=(reaction_mechanism, S),
+            loss='linear',
+            bounds=bounds,
+            method="trf",
+            max_nfev=10
+        )
         k_fit = result.x
         residuals, mse = __objective(k_fit, reaction_mechanism, S)
         return k_fit, mse
