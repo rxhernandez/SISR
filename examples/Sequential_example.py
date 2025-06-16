@@ -43,8 +43,8 @@ print("B -> C, 1.262e-4")
 print("C -> D, 3.156e-4")
 
 # rmg inputs
-number_of_generations = 20
-mechanisms_per_generation = 50
+number_of_generations = 10
+mechanisms_per_generation = 100
 min_rxns_per_mech = 3
 max_rxns_per_mech = 3
 fraction_of_mechanisms_passed_on = 0.1

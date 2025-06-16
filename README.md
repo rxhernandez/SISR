@@ -59,7 +59,7 @@ pip list | grep SISR
 ```
 > You should see the installed SISR package listed as follows:
 ```
-SISR                          0.0.1
+SISR                          0.1.0
 ```
 
 - ### Run Example
