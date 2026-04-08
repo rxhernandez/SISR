@@ -4,7 +4,7 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 import matplotlib
 
-from SISR.reaction_mechanism_generator import ReactionMechanismGenerator as rmg, reaction_system
+from SISR.reaction_mechanism_generator_hidden import ReactionMechanismGenerator as rmg, reaction_system
 
 #from mech_plot import plot_mechanism
 matplotlib.rcParams["font.family"] = "Times New Roman"
