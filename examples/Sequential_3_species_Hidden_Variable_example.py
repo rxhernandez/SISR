@@ -13,7 +13,7 @@ matplotlib.rcParams['figure.figsize'] = 6,6/1.82
 matplotlib.rcParams['axes.linewidth'] = 1.5
 matplotlib.rcParams['figure.figsize'] = 8,8/1.62
 
-# Create a function that imports the file "Sequential_data.txt" and returns t_test and x_test
+# Create a function that imports the file "Sequential_data_3_species_ACD.txt.txt" and returns t_test and x_test
 def import_data(filename):
     data = np.loadtxt(filename)
     t_test = data[:, 0]
@@ -33,9 +33,9 @@ plt.xlabel("Time (s)", fontsize=20)
 plt.ylabel("Concentration (mmol/L)", fontsize=20)
 plt.xticks(fontsize=20)
 plt.yticks(fontsize=20)
-plt.legend(["A", "B", "C", "D"], fontsize=20)
+plt.legend(["A", "C", "D"], fontsize=20)
 plt.grid()
-plt.savefig("Sequential_concentration.png", dpi=300, bbox_inches='tight')
+plt.savefig("Sequential_concentration_3_species_ACD.png", dpi=300, bbox_inches='tight')
 
 print("True Reaction Mechanism")
 print("A -> B, 6.312e-5")
@@ -75,10 +75,8 @@ plt.xlabel("Time (s)", fontsize=20)
 plt.ylabel("Concentration (mol/L)", fontsize=20)
 plt.xticks(fontsize=20)
 plt.yticks(fontsize=20)
-plt.legend(["A", "B", "C", "D"], fontsize=20)
+plt.legend(["A", "C", "D"], fontsize=20)
 plt.grid()
-plt.savefig("Sequential_concentration_fit.png", dpi=300, bbox_inches='tight')
+plt.savefig("Sequential_concentration_fit_3_species_ACD.png", dpi=300, bbox_inches='tight')
 
-# Output data file as txt with column 1 with time and next columns with concentrations
-output_data = np.column_stack((sol.t, concentrations.T))
-np.savetxt('fitted_sequential_data.txt', output_data, header='Time A B', fmt='%.6e')
+
